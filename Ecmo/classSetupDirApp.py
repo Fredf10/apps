@@ -94,7 +94,7 @@ class SetupApp:
         
         
         # Set up network plot loaded from image
-        localUrl = "app96/static/96model_first.svg"
+        localUrl = "Ecmo/static/96model_first.svg"
         
         self.countImages = 0
         
@@ -325,7 +325,7 @@ class SetupApp:
             
         return RMS
     
-    def removeOldSVG(self, staticDirRel="/app96/static"):
+    def removeOldSVG(self, staticDirRel="/Ecmo/static"):
 
         staticDirAbs = ''.join([self.cur, staticDirRel])
 
