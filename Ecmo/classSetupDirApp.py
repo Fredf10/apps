@@ -340,7 +340,7 @@ class SetupApp:
         
         """ Method thats load the """
 
-        old_file = "app96/static/96model.svg"
+        old_file = "Ecmo/static/96model.svg"
         f = open(old_file, "r")
         
         pathDict = {}
