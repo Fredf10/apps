@@ -109,12 +109,13 @@ class SetupApp:
         self.internalVessels = [1, 2, 3, 4, 5, 7, 9, 14, 15, 18, 19, 21, 23, 27, 28, 29, 30, 35, 37, 39, 41, 42, 43, 44, 46, 50, 52]
         
         #self.sectionSelect = Select(title='section', value="upperLeft", options=sectionList)
-        self.vesselIdSelect = Select(title='VesselId', value="1", options=vesselList)
+        self.vesselIdSelect = Select(title='VesselID', value="1", options=vesselList)
+        self.showVesselIdSelect = Select(title='Show vesselID on networks', value="No", options=["No", "Yes"])
         self.nodeSlider = Slider(title="node", value=0, start=0, end=2, step=1)
         self.canuleSelect = Select(title='Select site oof cannulation', value="aorta", options=['aorta', 'axillaris'])
         
         
-        self.Widgetlist = [self.vesselIdSelect, self.nodeSlider, self.canuleSelect]
+        self.Widgetlist = [self.vesselIdSelect, self.showVesselIdSelect, self.nodeSlider, self.canuleSelect]
     
         self.initialize()
         
@@ -162,7 +163,13 @@ class SetupApp:
         networkName = self.getNetworkName()
         vesselData = self.loadData(networkName, self.dataNumber, vesselId, relativeFilePath=True)
         print networkName
-        self.changeSVG()
+        
+        showVesselId = self.showVesselIdSelect.value
+        if showVesselId == "Yes":
+            showNumbers = True
+        else:
+            showNumbers = False
+        self.changeSVG(showNumbers=showNumbers)
         
         time = referenceVesseldata['time']
         P = referenceVesseldata['P']
@@ -370,7 +377,7 @@ class SetupApp:
         self.endLayerLines = endLayerLines
         
         
-    def changeSVG(self):
+    def changeSVG(self, showNumbers=True):
         """ Method that copy the lines in old_file which contain svg paths for each vessels.
             Every vessel which is in the reduced model is then represented with a path in a second layer, 
             with a different color.
@@ -379,13 +386,12 @@ class SetupApp:
         old_file = "Ecmo/static/96model.svg"
         vesselNumberFile = "Ecmo/static/vesselNumbers.svg"
         self.countImages += 1
-        new_file = "Ecmo/static/96model_" + str(timeModule.time()) + ".svg"
+        new_file = "Ecmo/static/96model_tmp" + str(timeModule.time()) + ".svg"
         previousFile = self.imageUrl
         print previousFile, "Ecmo/static/96model_first.svg", previousFile == "Ecmo/static/96model_first.svg"
-        if previousFile == "Ecmo/static/96model.svg" or previousFile == "Ecmo/static/96model_first.svg" or previousFile == "Ecmo/static/vesselNumbers.svg":
-            pass
-        else:
+        if "_tmp" in previousFile:
             os.remove(previousFile)
+            
         self.imageUrl = new_file
 
         f = open(old_file, "r")
@@ -419,8 +425,13 @@ class SetupApp:
                             f2.write(line)
                 f2.write(self.endLayerLines[0])
                 
+                if showNumbers:
+                    for numberLines in f1:
+                        f2.write(numberLines)
+                
             else:
                 f2.write(oldLine)
                 
         f.close()
+        f1.close()
         f2.close()
