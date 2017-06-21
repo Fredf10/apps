@@ -13,6 +13,7 @@ from bokeh.plotting import Figure
 from bokeh.models import ColumnDataSource, Range1d, Plot, Span
 from bokeh.models.widgets import Slider, Select, MultiSelect
 from bokeh.models.glyphs import ImageURL
+import time as timeModule
 
 import pickle
 #from matplotlib.pyplot import xlabel, ylabel
@@ -23,7 +24,8 @@ class SetupApp:
         
         self.dataNumber = '100'
 
-        self.reductionNetwork = 'Ecmo97_ref'
+        self.referenceNetwork = 'Ecmo97_ref'
+        self.ecmoNetwork = 'Ecmo97_aorta'
         
         
         self.cur = dirname(os.path.realpath('__file__'))
@@ -38,21 +40,22 @@ class SetupApp:
         #optAllVesselsWeighted_tot_constant_average_R1_preOpt.p
 
         
-        baseVesseldata = self.loadData(self.reductionNetwork, self.dataNumber, self.vesselId)
+        referenceVesseldata = self.loadData(self.referenceNetwork, self.dataNumber, self.vesselId)
         
-        time = baseVesseldata['time']
-        P = baseVesseldata['P']
-        Q = baseVesseldata['Q']
-        vesselName = baseVesseldata['name']
-        self.sourceP = ColumnDataSource(data=dict(x=time, y=P))
-        self.sourcePf = ColumnDataSource(data=dict(x=[], y=[]))
-        self.sourcePb = ColumnDataSource(data=dict(x=[], y=[]))
-        
-        self.sourceP_reduced = ColumnDataSource(data=dict(x=time, y=P))
+        time = referenceVesseldata['time']
+        P = referenceVesseldata['P']
+        Q = referenceVesseldata['Q']
+        vesselName = referenceVesseldata['name']
 
-        self.sourcePf_reduced = ColumnDataSource(data=dict(x=[], y=[]))
-        self.sourcePb_reduced = ColumnDataSource(data=dict(x=[], y=[]))
+        ecmoVesseldata = self.loadData(self.ecmoNetwork, self.dataNumber, self.vesselId)
         
+        time_ecmo = ecmoVesseldata['time']
+        P_ecmo = ecmoVesseldata['P']
+        Q_ecmo = ecmoVesseldata['Q']
+        
+        self.sourceP = ColumnDataSource(data=dict(x=time, y=P))
+        self.sourcePEcmoAorta = ColumnDataSource(data=dict(x=[time_ecmo], y=[P_ecmo]))
+        self.sourcePEcmoAxillaris = ColumnDataSource(data=dict(x=[], y=[]))
         
         # Set up plotP
         self.plotP = Figure(plot_height=400, plot_width=600, title="Pressure",
@@ -60,23 +63,17 @@ class SetupApp:
                             tools="crosshair,pan,reset,resize,save,wheel_zoom"
                             )
         
-        self.plotP.line('x', 'y', source=self.sourceP, color='black', line_width=2, legend='Full model')
-        self.plotP.line('x', 'y', source=self.sourcePf, color='black', line_width=2, line_dash='dashed')
-        self.plotP.line('x', 'y', source=self.sourcePb, color='black', line_width=2, line_dash='dotted')
+        self.plotP.line('x', 'y', source=self.sourceP, color='black', line_width=2, legend='Reference (young adult)')
+        self.plotP.line('x', 'y', source=self.sourcePEcmoAorta, color='green', line_width=2, legend='ECMO (aorta)')
+        self.plotP.line('x', 'y', source=self.sourcePEcmoAxillaris, color='black', line_width=2, legend='ECMO (axillaris)')
         
         
-        self.plotP.line('x', 'y', source=self.sourceP_reduced, color='red', line_width=2, legend='Reduced model')
-        self.plotP.line('x', 'y', source=self.sourcePf_reduced, color='red', line_width=2, line_dash='dashed')
-        self.plotP.line('x', 'y', source=self.sourcePb_reduced, color='red', line_width=2, line_dash='dotted')
         
 
         self.sourceQ = ColumnDataSource(data=dict(x=time, y=Q))
-        self.sourceQf = ColumnDataSource(data=dict(x=[], y=[]))
-        self.sourceQb = ColumnDataSource(data=dict(x=[], y=[]))
+        self.sourceQEcmoAorta = ColumnDataSource(data=dict(x=[time_ecmo], y=[Q_ecmo]))
+        self.sourceQEcmoAxillaris = ColumnDataSource(data=dict(x=[], y=[]))
         
-        self.sourceQ_reduced = ColumnDataSource(data=dict(x=time, y=Q))
-        self.sourceQf_reduced = ColumnDataSource(data=dict(x=[], y=[]))
-        self.sourceQb_reduced = ColumnDataSource(data=dict(x=[], y=[]))
         
         # Set up plotQ
         self.plotQ = Figure(plot_height=400, plot_width=600, title="flow",
@@ -85,12 +82,8 @@ class SetupApp:
                             )
         
         self.plotQ.line('x', 'y', source=self.sourceQ, color='black', line_width=2)
-        self.plotQ.line('x', 'y', source=self.sourceQf, color='black', line_width=2, line_dash='dashed')
-        self.plotQ.line('x', 'y', source=self.sourceQb, color='black', line_width=2, line_dash='dotted')
-               
-        self.plotQ.line('x', 'y', source=self.sourceQ_reduced, color='red', line_width=2)
-        self.plotQ.line('x', 'y', source=self.sourceQf_reduced, color='red', line_width=2, line_dash='dashed', legend='forward')
-        self.plotQ.line('x', 'y', source=self.sourceQb_reduced, color='red', line_width=2, line_dash='dotted', legend='backward')
+        self.plotQ.line('x', 'y', source=self.sourceQEcmoAorta, color='green', line_width=2)
+        self.plotQ.line('x', 'y', source=self.sourceQEcmoAxillaris, color='red', line_width=2)
         
         
         # Set up network plot loaded from image
@@ -115,19 +108,14 @@ class SetupApp:
         
         self.internalVessels = [1, 2, 3, 4, 5, 7, 9, 14, 15, 18, 19, 21, 23, 27, 28, 29, 30, 35, 37, 39, 41, 42, 43, 44, 46, 50, 52]
         
-        sectionList = ["cerebral"]
         #self.sectionSelect = Select(title='section', value="upperLeft", options=sectionList)
         self.vesselIdSelect = Select(title='VesselId', value="1", options=vesselList)
         self.nodeSlider = Slider(title="node", value=0, start=0, end=2, step=1)
         self.canuleSelect = Select(title='Select site oof cannulation', value="aorta", options=['aorta', 'axillaris'])
-        self.waveSplitSelect = Select(title='Show waveSplit', value="False", options=["False", "True"])
         
         
         self.Widgetlist = [self.vesselIdSelect, self.nodeSlider, self.canuleSelect]
     
-
-
-        
         self.initialize()
         
         listOfPlots = [self.plotP, self.plotQ]
@@ -169,51 +157,48 @@ class SetupApp:
         self.vesselId = vesselId
         
         
-        baseVesseldata = self.loadData(self.reductionNetwork, self.dataNumber, vesselId, relativeFilePath=True)
+        referenceVesseldata = self.loadData(self.referenceNetwork, self.dataNumber, vesselId, relativeFilePath=True)
             
         networkName = self.getNetworkName()
         vesselData = self.loadData(networkName, self.dataNumber, vesselId, relativeFilePath=True)
         print networkName
         self.changeSVG()
         
-        time = baseVesseldata['time']
-        P = baseVesseldata['P']
-        Pm = baseVesseldata['Pm']
-        R = baseVesseldata['R']
-        Pf = baseVesseldata['Pf']
-        Pb = baseVesseldata['Pb']
+        time = referenceVesseldata['time']
+        P = referenceVesseldata['P']
+        Pm = referenceVesseldata['Pm']
+        R = referenceVesseldata['R']
+        Pf = referenceVesseldata['Pf']
+        Pb = referenceVesseldata['Pb']
         
-        P_reduced = vesselData['P']
-        Pm_reduced = vesselData['Pm']
-        R_reduced = vesselData['R']
-        Pf_reduced = vesselData['Pf']
-        Pb_reduced = vesselData['Pb']
+        P_ecmo = vesselData['P']
+        Pm_ecmo = vesselData['Pm']
+        R_ecmo = vesselData['R']
+
         
 
-        Q = baseVesseldata['Q']
-        Qm = baseVesseldata['Qm']
-        Qf = baseVesseldata['Qf']
-        Qb = baseVesseldata['Qb']
+        Q = referenceVesseldata['Q']
+        Qm = referenceVesseldata['Qm']
+        Qf = referenceVesseldata['Qf']
         
-        Q_reduced = vesselData['Q']
-        Qm_reduced = vesselData['Qm']
-        Qf_reduced = vesselData['Qf']
-        Qb_reduced = vesselData['Qb']
+        Q_ecmo = vesselData['Q']
+        Qm_ecmo = vesselData['Qm']
+
         
-        RMS_P = round(self.calcRMS(P, P_reduced, data_type="P")*100, 2)
-        RMS_Q = round(self.calcRMS(Q, Q_reduced, data_type="Q")*100, 2)
+        RMS_P = round(self.calcRMS(P, P_ecmo, data_type="P")*100, 2)
+        RMS_Q = round(self.calcRMS(Q, Q_ecmo, data_type="Q")*100, 2)
         
         
-        self.plotP.title.text = "Pm = ({0}, {1}), R = ({2}, {3}); format = (Full, Reduced), epsilon = {4}".format(Pm, Pm_reduced, R, R_reduced, RMS_P)
+        self.plotP.title.text = "Pm = ({0}, {1}), R = ({2}, {3}); format = (reference, ecmo)".format(Pm, Pm_ecmo, R, R_ecmo)
         self.plot_Img.title.text = vesselData['name']
-        self.plotQ.title.text = "Qm = ({0}, {1}), epsilon = {2}".format(Qm, Qm_reduced, RMS_Q)
+        self.plotQ.title.text = "Qm = ({0}, {1}), epsilon = {2}".format(Qm, Qm_ecmo, RMS_Q)
         
         self.sourceP.data = dict(x=time, y=P)
 
-        self.sourceP_reduced.data = dict(x=time, y=P_reduced)
+        self.sourcePEcmoAorta.data = dict(x=time, y=P_ecmo)
 
         self.sourceQ.data = dict(x=time, y=Q)
-        self.sourceQ_reduced.data = dict(x=time, y=Q_reduced)
+        self.sourceQEcmoAorta.data = dict(x=time, y=Q_ecmo)
         
         
         localUrl = self.imageUrl
@@ -392,14 +377,19 @@ class SetupApp:
         """
 
         old_file = "Ecmo/static/96model.svg"
+        vesselNumberFile = "Ecmo/static/vesselNumbers.svg"
         self.countImages += 1
-        new_file = "Ecmo/static/96model_reduced" + str(self.countImages) + ".svg"
-        
+        new_file = "Ecmo/static/96model_" + str(timeModule.time()) + ".svg"
+        previousFile = self.imageUrl
+        print previousFile, "Ecmo/static/96model_first.svg", previousFile == "Ecmo/static/96model_first.svg"
+        if previousFile == "Ecmo/static/96model.svg" or previousFile == "Ecmo/static/96model_first.svg" or previousFile == "Ecmo/static/vesselNumbers.svg":
+            pass
+        else:
+            os.remove(previousFile)
         self.imageUrl = new_file
-        if self.countImages > 2:
-            os.remove("Ecmo/static/96model_reduced" + str(self.countImages - 2) + ".svg")
 
         f = open(old_file, "r")
+        f1 = open(vesselNumberFile, "r")
         f2 = open(new_file, "w")
         
         for oldLine in f:
