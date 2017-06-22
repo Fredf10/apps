@@ -63,9 +63,9 @@ class SetupApp:
                             tools="crosshair,pan,reset,resize,save,wheel_zoom"
                             )
         
-        self.plotP.line('x', 'y', source=self.sourceP, color='black', line_width=2, legend='Reference (young adult)')
-        self.plotP.line('x', 'y', source=self.sourcePEcmoAorta, color='green', line_width=2, legend='ECMO (aorta)')
-        self.plotP.line('x', 'y', source=self.sourcePEcmoAxillaris, color='black', line_width=2, legend='ECMO (axillaris)')
+        self.plotP.line('x', 'y', source=self.sourceP, color='black', line_width=2)
+        self.plotP.line('x', 'y', source=self.sourcePEcmoAorta, color='green', line_width=2)
+        self.plotP.line('x', 'y', source=self.sourcePEcmoAxillaris, color='orange', line_width=2)
         
         
         
@@ -81,9 +81,9 @@ class SetupApp:
                             tools="crosshair,pan,reset,resize,save,wheel_zoom",
                             )
         
-        self.plotQ.line('x', 'y', source=self.sourceQ, color='black', line_width=2)
-        self.plotQ.line('x', 'y', source=self.sourceQEcmoAorta, color='green', line_width=2)
-        self.plotQ.line('x', 'y', source=self.sourceQEcmoAxillaris, color='red', line_width=2)
+        self.plotQ.line('x', 'y', source=self.sourceQ, color='black', line_width=2, legend='Reference (young adult)')
+        self.plotQ.line('x', 'y', source=self.sourceQEcmoAorta, color='green', line_width=2, legend='ECMO (aorta)')
+        self.plotQ.line('x', 'y', source=self.sourceQEcmoAxillaris, color='orange', line_width=2, legend='ECMO (axillaris)')
         
         
         # Set up network plot loaded from image
@@ -110,12 +110,13 @@ class SetupApp:
         
         #self.sectionSelect = Select(title='section', value="upperLeft", options=sectionList)
         self.vesselIdSelect = Select(title='VesselID', value="1", options=vesselList)
-        self.showVesselIdSelect = Select(title='Show vesselID on networks', value="No", options=["No", "Yes"])
+        self.showVesselIdSelect = Select(title='Show vesselID on network', value="No", options=["No", "Yes"])
         self.nodeSlider = Slider(title="node", value=0, start=0, end=2, step=1)
-        self.canuleSelect = Select(title='Select site oof cannulation', value="aorta", options=['aorta', 'axillaris'])
+        self.canuleSelect = Select(title='Select cannulation site ', value="aorta", options=['aorta', 'axillaris', 'both'])
+        self.flowSelect = Select(title='Select cardiac output (CO) for ECMO', value="CO = 3.2 L/min (60 mmHg in right Radial)", options=['CO = 6.2 L/min (same as reference)', 'CO = 3.2 L/min (60 mmHg in right Radial)'])
         
         
-        self.Widgetlist = [self.vesselIdSelect, self.showVesselIdSelect, self.nodeSlider, self.canuleSelect]
+        self.Widgetlist = [self.vesselIdSelect, self.showVesselIdSelect, self.nodeSlider, self.canuleSelect, self.flowSelect]
     
         self.initialize()
         
@@ -158,11 +159,12 @@ class SetupApp:
         self.vesselId = vesselId
         
         
-        referenceVesseldata = self.loadData(self.referenceNetwork, self.dataNumber, vesselId, relativeFilePath=True)
+        referenceVesseldata = self.loadData(self.referenceNetwork, '100', vesselId, relativeFilePath=True)
             
-        networkName = self.getNetworkName()
-        vesselData = self.loadData(networkName, self.dataNumber, vesselId, relativeFilePath=True)
-        print networkName
+        #networkName = self.getNetworkName()
+        vesselData_EcmoAorta = self.loadData('Ecmo97_aorta', self.dataNumber, vesselId, relativeFilePath=True)
+        vesselData_EcmoAxillaris = self.loadData('Ecmo97_axillaris', self.dataNumber, vesselId, relativeFilePath=True)
+        #print networkName
         
         showVesselId = self.showVesselIdSelect.value
         if showVesselId == "Yes":
@@ -178,34 +180,69 @@ class SetupApp:
         Pf = referenceVesseldata['Pf']
         Pb = referenceVesseldata['Pb']
         
-        P_ecmo = vesselData['P']
-        Pm_ecmo = vesselData['Pm']
-        R_ecmo = vesselData['R']
+        P_ecmoAorta = vesselData_EcmoAorta['P']
+        Pm_ecmoAorta = vesselData_EcmoAorta['Pm']
+        R_ecmoAorta = vesselData_EcmoAorta['R']
 
+        P_ecmoAxillaris = vesselData_EcmoAxillaris['P']
+        Pm_ecmoAxillaris = vesselData_EcmoAxillaris['Pm']
+        R_ecmoAxillaris = vesselData_EcmoAxillaris['R']
         
 
         Q = referenceVesseldata['Q']
         Qm = referenceVesseldata['Qm']
         Qf = referenceVesseldata['Qf']
         
-        Q_ecmo = vesselData['Q']
-        Qm_ecmo = vesselData['Qm']
+        Q_ecmoAorta = vesselData_EcmoAorta['Q']
+        Qm_ecmoAorta = vesselData_EcmoAorta['Qm']
+
+        Q_ecmoAxillaris = vesselData_EcmoAxillaris['Q']
+        Qm_ecmoAxillaris = vesselData_EcmoAxillaris['Qm']
 
         
-        RMS_P = round(self.calcRMS(P, P_ecmo, data_type="P")*100, 2)
-        RMS_Q = round(self.calcRMS(Q, Q_ecmo, data_type="Q")*100, 2)
+        RMS_P_ecmoAorta = round(self.calcRMS(P, P_ecmoAorta, data_type="P")*100, 2)
+        RMS_Q_ecmoAorta = round(self.calcRMS(Q, Q_ecmoAorta, data_type="Q")*100, 2)
+
+        RMS_P_ecmoAxillaris = round(self.calcRMS(P, P_ecmoAxillaris, data_type="P")*100, 2)
+        RMS_Q_ecmoAxillaris = round(self.calcRMS(Q, Q_ecmoAxillaris, data_type="Q")*100, 2)
         
+        if self.canuleSelect.value == 'aorta':
+            Pm_ecmo = Pm_ecmoAorta
+            R_ecmo = R_ecmoAorta
+            Qm_ecmo = Qm_ecmoAorta
+            self.sourcePEcmoAorta.data = dict(x=time, y=P_ecmoAorta)
+            self.sourcePEcmoAxillaris.data = dict(x=[], y=[])
+            
+            self.sourceQEcmoAorta.data = dict(x=time, y=Q_ecmoAorta)
+            self.sourceQEcmoAxillaris.data = dict(x=[], y=[])
+        elif self.canuleSelect.value == 'axillaris':
+            Pm_ecmo = Pm_ecmoAxillaris
+            R_ecmo = R_ecmoAxillaris
+            Qm_ecmo = Qm_ecmoAxillaris
+            self.sourcePEcmoAorta.data = dict(x=[], y=[])
+            self.sourcePEcmoAxillaris.data = dict(x=time, y=P_ecmoAxillaris)
+            
+            self.sourceQEcmoAorta.data = dict(x=[], y=[])
+            self.sourceQEcmoAxillaris.data = dict(x=time, y=Q_ecmoAxillaris)
+        elif self.canuleSelect.value == 'both':
+            Pm_ecmo = Pm_ecmoAorta
+            R_ecmo = R_ecmoAorta
+            Qm_ecmo = Qm_ecmoAorta
+            self.sourcePEcmoAorta.data = dict(x=time, y=P_ecmoAorta)
+            self.sourcePEcmoAxillaris.data = dict(x=time, y=P_ecmoAxillaris)
+            
+            self.sourceQEcmoAorta.data = dict(x=time, y=Q_ecmoAorta)
+            self.sourceQEcmoAxillaris.data = dict(x=time, y=Q_ecmoAxillaris)
         
         self.plotP.title.text = "Pm = ({0}, {1}), R = ({2}, {3}); format = (reference, ecmo)".format(Pm, Pm_ecmo, R, R_ecmo)
-        self.plot_Img.title.text = vesselData['name']
-        self.plotQ.title.text = "Qm = ({0}, {1}), epsilon = {2}".format(Qm, Qm_ecmo, RMS_Q)
+        self.plot_Img.title.text = vesselData_EcmoAorta['name']
+        self.plotQ.title.text = "Qm = ({0}, {1})".format(Qm, Qm_ecmo)
         
         self.sourceP.data = dict(x=time, y=P)
 
-        self.sourcePEcmoAorta.data = dict(x=time, y=P_ecmo)
 
         self.sourceQ.data = dict(x=time, y=Q)
-        self.sourceQEcmoAorta.data = dict(x=time, y=Q_ecmo)
+
         
         
         localUrl = self.imageUrl
@@ -214,9 +251,14 @@ class SetupApp:
     
      
     def assignDataNumber(self):
-
-        self.dataNumber = '100'
+        CO = self.flowSelect.value
         
+        if '3.2' in CO:
+            
+            self.dataNumber = '100'
+        else:
+            
+            self.dataNumber = '200'
         
     def getNetworkName(self):
         canuleSite = self.canuleSelect.value
@@ -376,6 +418,19 @@ class SetupApp:
         self.startLayerLines = startLayerLines
         self.endLayerLines = endLayerLines
         
+        self.canuleAortaSVG = """  <circle
+     style="opacity:0.85;fill:#000000;fill-opacity:0.50574714;stroke:#000000;stroke-width:4;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.50588238"
+     id="path4231"
+     cx="337.56393"
+     cy="288.9826"
+     r="15" />"""
+        self.canuleAxillarisSVG = """   <circle
+     style="display:inline;opacity:0.85;fill:#000000;fill-opacity:0.50574712;stroke:#000000;stroke-width:4;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.50588223"
+     id="path4231-0"
+     cx="181.17801"
+     cy="229.04736"
+     r="15" />"""
+        
         
     def changeSVG(self, showNumbers=True):
         """ Method that copy the lines in old_file which contain svg paths for each vessels.
@@ -423,6 +478,14 @@ class SetupApp:
                                     line = line.replace("#000000", "#ff0000")
                             
                             f2.write(line)
+                if self.canuleSelect.value == 'aorta':
+                    f2.write(self.canuleAortaSVG)
+                elif self.canuleSelect.value == 'axillaris':
+                    f2.write(self.canuleAxillarisSVG)
+                elif self.canuleSelect.value == 'both':
+                    f2.write(self.canuleAortaSVG)
+                    f2.write(self.canuleAxillarisSVG)
+                    
                 f2.write(self.endLayerLines[0])
                 
                 if showNumbers:
