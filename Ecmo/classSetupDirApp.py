@@ -236,7 +236,7 @@ class SetupApp:
         
         self.plotP.title.text = "Pm = ({0}, {1}), R = ({2}, {3})".format(Pm, Pm_ecmo, R, R_ecmo)
         self.plot_Img.title.text = vesselData_EcmoAorta['name']
-        self.plotQ.title.text = "Qm = ({0}, {1}; (reference, ecmo))".format(Qm, Qm_ecmo)
+        self.plotQ.title.text = "Qm = ({0}, {1}); (reference, ecmo)".format(Qm, Qm_ecmo)
         
         self.sourceP.data = dict(x=time, y=P)
 
