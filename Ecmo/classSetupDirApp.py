@@ -113,7 +113,7 @@ class SetupApp:
         self.showVesselIdSelect = Select(title='Show vesselID on network', value="No", options=["No", "Yes"])
         self.nodeSlider = Slider(title="node", value=0, start=0, end=2, step=1)
         self.canuleSelect = Select(title='Select cannulation site ', value="aorta", options=['aorta', 'axillaris', 'both'])
-        self.flowSelect = Select(title='Select cardiac output (CO) for ECMO', value="CO = 3.2 L/min (60 mmHg in right Radial)", options=['CO = 6.2 L/min (same as reference)', 'CO = 3.2 L/min (60 mmHg in right Radial)'])
+        self.flowSelect = Select(title='Select cardiac output (CO) for ECMO', value="3.2 L/min (60 mmHg in l. Radial)", options=['6.2 L/min (same as reference)', '3.2 L/min (60 mmHg in l. Radial)'])
         
         
         self.Widgetlist = [self.vesselIdSelect, self.showVesselIdSelect, self.nodeSlider, self.canuleSelect, self.flowSelect]
@@ -419,13 +419,13 @@ class SetupApp:
         self.endLayerLines = endLayerLines
         
         self.canuleAortaSVG = """  <circle
-     style="opacity:0.85;fill:#000000;fill-opacity:0.50574714;stroke:#000000;stroke-width:4;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.50588238"
+     style="opacity:0.85;fill:#000000;fill-opacity:0.30574714;stroke:#000000;stroke-width:4;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.50588238"
      id="path4231"
      cx="337.56393"
      cy="288.9826"
      r="15" />"""
         self.canuleAxillarisSVG = """   <circle
-     style="display:inline;opacity:0.85;fill:#000000;fill-opacity:0.50574712;stroke:#000000;stroke-width:4;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.50588223"
+     style="display:inline;opacity:0.85;fill:#000000;fill-opacity:0.30574712;stroke:#000000;stroke-width:4;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.50588223"
      id="path4231-0"
      cx="181.17801"
      cy="229.04736"
@@ -478,6 +478,16 @@ class SetupApp:
                                     line = line.replace("#000000", "#ff0000")
                             
                             f2.write(line)
+                        
+                f2.write(self.endLayerLines[0])
+                for line in self.startLayerLines:
+                    if "Layer 1" in line:
+                        line = line.replace("Layer 1", "Layer 4")
+                        
+                    elif "layer1" in line:
+                        line = line.replace("layer1", "layer4")
+                    f2.write(line)
+                    
                 if self.canuleSelect.value == 'aorta':
                     f2.write(self.canuleAortaSVG)
                 elif self.canuleSelect.value == 'axillaris':
