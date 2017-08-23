@@ -123,7 +123,7 @@ class SetupApp:
         self.internalVessels = [1, 2, 3, 4, 5, 7, 9, 14, 15, 18, 19, 21, 23, 27, 28, 29, 30, 35, 37, 39, 41, 42, 43, 44, 46, 50, 52]
         
         self.vesselIdSelect = Select(title='VesselId', value="1", options=vesselList)
-        self.nodeSlider = Slider(title="node", value=0, start=0, end=2, step=1)
+        
 
         self.waveSplitSelect = Select(title='Show waveSplit', value="False", options=["False", "True"])
         
@@ -132,7 +132,7 @@ class SetupApp:
         self.constraintSlider = Slider(title='Choose constraint', value=0.1, start=0.1, end=3.5, step=0.1)
         
         
-        self.Widgetlist = [self.nodeSlider, self.waveSplitSelect, self.minimizeSelect, self.constraintSlider]
+        self.Widgetlist = [self.waveSplitSelect, self.minimizeSelect, self.constraintSlider]
     
 
         self.initialize()
@@ -168,9 +168,6 @@ class SetupApp:
         
 
         #additionalPlot = self.additionalSelect.value
-        self.node = self.nodeSlider.value
-        
-        
         
         
         networkName = self.getNetworkName()
@@ -494,27 +491,32 @@ class SetupApp:
             constraint = str(float(self.constraintSlider.value))
             networkName = self.aortaRMSPressureDict[constraint]['networkName']
             self.vesselId = self.aortaRMSPressureDict['vesselId']
+            self.node = self.aortaRMSPressureDict['node']
         elif 'Carotid' in self.minimizeSelect.value:
             
             constraint = str(float(self.constraintSlider.value))
             if 'Internal' in self.minimizeSelect.value:
                 networkName = self.internalCarotidRMSFlowDict[constraint]['networkName']
                 self.vesselId = self.internalCarotidRMSFlowDict['vesselId']
+                self.node = self.internalCarotidRMSFlowDict['node']
             else:
                 networkName = self.carotidRMSFlowDict[constraint]['networkName']
                 self.vesselId = self.carotidRMSFlowDict['vesselId']
+                self.node = self.carotidRMSFlowDict['node']
         elif 'Brachial' in self.minimizeSelect.value:
             
             constraint = str(float(self.constraintSlider.value))
             
             networkName = self.brachialPulseDict[constraint]['networkName']
             self.vesselId = self.brachialPulseDict[constraint]['vesselId']
+            self.node = self.brachialPulseDict['node']
         
         elif 'Femoral' in self.minimizeSelect.value:
             
             constraint = str(float(self.constraintSlider.value))
             networkName = self.femoralRMSPressureDict[constraint]['networkName']
             self.vesselId = self.femoralRMSPressureDict[constraint]['vesselId']
+            self.node = self.femoralRMSPressureDict['node']
             
         return networkName
     
