@@ -14,6 +14,7 @@ from bokeh.plotting import Figure
 from bokeh.models import ColumnDataSource, Range1d, Plot, Span
 from bokeh.models.widgets import Slider, Select, MultiSelect
 from bokeh.models.glyphs import ImageURL
+import time as timeModule
 
 import pickle
 #from matplotlib.pyplot import xlabel, ylabel
@@ -692,12 +693,13 @@ class SetupApp:
 
         old_file = "app96Simple/static/96model.svg"
         self.countImages += 1
-        new_file = "app96Simple/static/96model_reduced" + str(self.countImages) + ".svg"
+        new_file = "app96Simple/static/96model_tmp" + str(timeModule.time()) + ".svg"
+        previousFile = self.imageUrl
+
+        if "_tmp" in previousFile:
+            os.remove(previousFile)
         
         self.imageUrl = new_file
-        if self.countImages > 2:
-            os.remove("app96Simple/static/96model_reduced" + str(self.countImages - 2) + ".svg")
-
         f = open(old_file, "r")
         f2 = open(new_file, "w")
         
