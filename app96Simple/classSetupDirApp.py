@@ -51,6 +51,9 @@ class SetupApp:
 
         self.leftPosteriorCerebralPressureDict = pickle.load(open("app96Simple/optDicts/leftPosteriorCerebralPressureDict.p", 'rb'))
         self.leftPosteriorCerebralFlowDict = pickle.load(open("app96Simple/optDicts/leftPosteriorCerebralFlowDict.p", 'rb'))
+
+        self.rightAnteriorCerebralFlowDict = pickle.load(open("app96Simple/optDicts/rightAnteriorCerebralFlowDict.p", 'rb'))
+        self.rightAnteriorCerebralPressureDict = pickle.load(open("app96Simple/optDicts/rightAnteriorCerebralPressureDict.p", 'rb'))
         
         baseVesseldata = self.loadData(self.reductionNetwork, self.dataNumber, self.vesselId)
         
@@ -145,7 +148,9 @@ class SetupApp:
                                               'r. M. Cerebral (Pressure epsilon avg)', 
                                               'r. M. Cerebral (Flow epsilon avg)', 
                                               'l. P. Cerebral (Pressure epsilon avg)', 
-                                              'l. P. Cerebral (Flow epsilon avg)'])
+                                              'l. P. Cerebral (Flow epsilon avg)', 
+                                              'r. ant. Cerebral (Pressure epsilon avg)',
+                                              'r. ant. Cerebral (Flow epsilon avg)'])
         
         self.minimizationDicts = {'Aorta (Pressure epsilon avg)': self.aortaRMSPressureDict, 
                                   'Carotid (Flow epsilon avg)': self.carotidRMSFlowDict, 
@@ -157,7 +162,9 @@ class SetupApp:
                                   'r. M. Cerebral (Pressure epsilon avg)': self.rightMiddleCerebralPressureDict,
                                   'r. M. Cerebral (Flow epsilon avg)': self.rightMiddleCerebralFlowDict, 
                                   'l. P. Cerebral (Pressure epsilon avg)': self.leftPosteriorCerebralPressureDict, 
-                                  'l. P. Cerebral (Flow epsilon avg)': self.leftPosteriorCerebralFlowDict}
+                                  'l. P. Cerebral (Flow epsilon avg)': self.leftPosteriorCerebralFlowDict,
+                                  'r. ant. Cerebral (Pressure epsilon avg)':self.rightAnteriorCerebralPressureDict,
+                                  'r. ant. Cerebral (Flow epsilon avg)':self.rightAnteriorCerebralFlowDict}
         
         self.constraintSlider = Slider(title='Choose constraint', value=0.1, start=0.1, end=3.5, step=0.1)
         
