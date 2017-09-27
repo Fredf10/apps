@@ -44,6 +44,13 @@ class SetupApp:
         self.carotidRMSFlowDict = pickle.load(open("app96Simple/optDicts/carotidRMSFlowDict.p", 'rb'))
         self.internalCarotidRMSFlowDict = pickle.load(open("app96Simple/optDicts/internalCarotidRMSPressureDict.p", 'rb'))
         self.femoralRMSPressureDict = pickle.load(open("app96Simple/optDicts/femoralRMSPressureDict.p", 'rb'))
+        self.anteriorCommunicatingFlowDict = pickle.load(open("app96Simple/optDicts/anteriorCommunicatingFlowDict.p", 'rb'))
+        self.anteriorCommunicatingPressureDict = pickle.load(open("app96Simple/optDicts/anteriorCommunicatingPressureDict.p", 'rb'))
+        self.rightMiddleCerebralFlowDict = pickle.load(open("app96Simple/optDicts/rightMiddleCerebralFlowDict.p", 'rb'))
+        self.rightMiddleCerebralPressureDict = pickle.load(open("app96Simple/optDicts/rightMiddleCerebralPressureDict.p", 'rb'))
+
+        self.leftPosteriorCerebralPressureDict = pickle.load(open("app96Simple/optDicts/leftPosteriorCerebralPressureDict.p", 'rb'))
+        self.leftPosteriorCerebralFlowDict = pickle.load(open("app96Simple/optDicts/leftPosteriorCerebralFlowDict.p", 'rb'))
         
         baseVesseldata = self.loadData(self.reductionNetwork, self.dataNumber, self.vesselId)
         
@@ -127,7 +134,30 @@ class SetupApp:
 
         self.waveSplitSelect = Select(title='Show waveSplit', value="False", options=["False", "True"])
         
-        self.minimizeSelect = Select(title='minimization case:', value="Aorta (Pressure epsilon avg)", options=['None', 'Aorta (Pressure epsilon avg)', 'Carotid (Flow epsilon avg)', 'InternalCarotid (Pressure epsilon avg)', 'Brachial (Pressure Pulse)', 'Femoral (Pressure epsilon avg)'])
+        self.minimizeSelect = Select(title='minimization case:', value="Aorta (Pressure epsilon avg)", 
+                                     options=['Aorta (Pressure epsilon avg)', 
+                                              'Carotid (Flow epsilon avg)', 
+                                              'InternalCarotid (Pressure epsilon avg)', 
+                                              'Brachial (Pressure Pulse)', 
+                                              'Femoral (Pressure epsilon avg)', 
+                                              'ant. Com. (Pressure epsilon avg)', 
+                                              'ant. Com. (Flow epsilon avg)', 
+                                              'r. M. Cerebral (Pressure epsilon avg)', 
+                                              'r. M. Cerebral (Flow epsilon avg)', 
+                                              'l. P. Cerebral (Pressure epsilon avg)', 
+                                              'l. P. Cerebral (Flow epsilon avg)'])
+        
+        self.minimizationDicts = {'Aorta (Pressure epsilon avg)': self.aortaRMSPressureDict, 
+                                  'Carotid (Flow epsilon avg)': self.carotidRMSFlowDict, 
+                                  'InternalCarotid (Pressure epsilon avg)': self.internalCarotidRMSFlowDict, 
+                                  'Brachial (Pressure Pulse)': self.brachialPulseDict,
+                                  'Femoral (Pressure epsilon avg)': self.femoralRMSPressureDict, 
+                                  'ant. Com. (Pressure epsilon avg)': self.anteriorCommunicatingPressureDict,
+                                  'ant. Com. (Flow epsilon avg)': self.anteriorCommunicatingFlowDict, 
+                                  'r. M. Cerebral (Pressure epsilon avg)': self.rightMiddleCerebralPressureDict,
+                                  'r. M. Cerebral (Flow epsilon avg)': self.rightMiddleCerebralFlowDict, 
+                                  'l. P. Cerebral (Pressure epsilon avg)': self.leftPosteriorCerebralPressureDict, 
+                                  'l. P. Cerebral (Flow epsilon avg)': self.leftPosteriorCerebralFlowDict}
         
         self.constraintSlider = Slider(title='Choose constraint', value=0.1, start=0.1, end=3.5, step=0.1)
         
@@ -207,10 +237,12 @@ class SetupApp:
         RMS_P = round(self.calcRMS(P, P_reduced, data_type="P")*100, 2)
         RMS_Q = round(self.calcRMS(Q, Q_reduced, data_type="Q")*100, 2)
         
+        Nv_baseline = baseVesseldata['Nv']
+        Nv_reduced = vesselData['Nv']
         
         self.plotP.title.text = "Pm = ({0}, {1}), R = ({2}, {3}); format = (Full, Reduced), epsilon = {4}".format(Pm, Pm_reduced, R, R_reduced, RMS_P)
         self.plot_Img.title.text = vesselData['name']
-        self.plotQ.title.text = "Qm = ({0}, {1}), epsilon = {2}".format(Qm, Qm_reduced, RMS_Q)
+        self.plotQ.title.text = "Qm = ({0}, {1}), epsilon = {2}. N = ({3}, {4})".format(Qm, Qm_reduced, RMS_Q, Nv_baseline, Nv_reduced)
         
         self.sourceP.data = dict(x=time, y=P)
 
@@ -485,38 +517,11 @@ class SetupApp:
         
         
     def getNetworkName(self):
-
-        if 'Aorta' in self.minimizeSelect.value:
-            
-            constraint = str(float(self.constraintSlider.value))
-            networkName = self.aortaRMSPressureDict[constraint]['networkName']
-            self.vesselId = self.aortaRMSPressureDict['vesselId']
-            self.node = self.aortaRMSPressureDict['node']
-        elif 'Carotid' in self.minimizeSelect.value:
-            
-            constraint = str(float(self.constraintSlider.value))
-            if 'Internal' in self.minimizeSelect.value:
-                networkName = self.internalCarotidRMSFlowDict[constraint]['networkName']
-                self.vesselId = self.internalCarotidRMSFlowDict['vesselId']
-                self.node = self.internalCarotidRMSFlowDict['node']
-            else:
-                networkName = self.carotidRMSFlowDict[constraint]['networkName']
-                self.vesselId = self.carotidRMSFlowDict['vesselId']
-                self.node = self.carotidRMSFlowDict['node']
-        elif 'Brachial' in self.minimizeSelect.value:
-            
-            constraint = str(float(self.constraintSlider.value))
-            
-            networkName = self.brachialPulseDict[constraint]['networkName']
-            self.vesselId = self.brachialPulseDict[constraint]['vesselId']
-            self.node = self.brachialPulseDict['node']
-        
-        elif 'Femoral' in self.minimizeSelect.value:
-            
-            constraint = str(float(self.constraintSlider.value))
-            networkName = self.femoralRMSPressureDict[constraint]['networkName']
-            self.vesselId = self.femoralRMSPressureDict[constraint]['vesselId']
-            self.node = self.femoralRMSPressureDict['node']
+        minimizationCase = self.minimizeSelect.value
+        constraint = str(str(float(self.constraintSlider.value)))
+        networkName = self.minimizationDicts[minimizationCase][constraint]['networkName']
+        self.vesselId = self.minimizationDicts[minimizationCase]['vesselId']
+        self.node = self.minimizationDicts[minimizationCase]['node']
             
         return networkName
     
@@ -551,6 +556,7 @@ class SetupApp:
         time_compare = np.linspace(t_start, t_end, N + 1)
         
         self.vesselIdList =  []
+        Nv = 0
         for vesselName in hdf5File['vessels'].keys():
             
             tmpvesselId = vesselName.split(' - ')[-1]
@@ -571,6 +577,7 @@ class SetupApp:
                 Qm = self.findMean(time_compare, Q)
                 
                 vName = vesselName.split(' - ')[0]
+            Nv += 1
                 
         if medical:
             #NB! no conversion of A
@@ -598,6 +605,7 @@ class SetupApp:
         vesseldict['Qm'] = round(Qm, 2)
         vesseldict['R'] = round(R, 2)
         vesseldict['A'] = A
+        vesseldict['Nv'] = Nv
         
         return vesseldict
     
