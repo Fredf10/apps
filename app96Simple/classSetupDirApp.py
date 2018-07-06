@@ -77,12 +77,12 @@ class SetupApp:
                             tools="crosshair,pan,reset,resize,save,wheel_zoom"
                             )
         
-        self.plotP.line('x', 'y', source=self.sourceP, color='black', line_width=2)#, legend='Full model')
+        self.plotP.line('x', 'y', source=self.sourceP, color='black', line_width=3)#, legend='Full model')
         self.plotP.line('x', 'y', source=self.sourcePf, color='black', line_width=2, line_dash='dashed')
         self.plotP.line('x', 'y', source=self.sourcePb, color='black', line_width=2, line_dash='dotted')
         
         
-        self.plotP.line('x', 'y', source=self.sourceP_reduced, color='red', line_width=2)#, legend='Reduced model')
+        self.plotP.line('x', 'y', source=self.sourceP_reduced, color='red', line_width=3)#, legend='Reduced model')
         self.plotP.line('x', 'y', source=self.sourcePf_reduced, color='red', line_width=2, line_dash='dashed')
         self.plotP.line('x', 'y', source=self.sourcePb_reduced, color='red', line_width=2, line_dash='dotted')
         
@@ -101,11 +101,11 @@ class SetupApp:
                             tools="crosshair,pan,reset,resize,save,wheel_zoom",
                             )
         
-        self.plotQ.line('x', 'y', source=self.sourceQ, color='black', line_width=2)
+        self.plotQ.line('x', 'y', source=self.sourceQ, color='black', line_width=3)
         self.plotQ.line('x', 'y', source=self.sourceQf, color='black', line_width=2, line_dash='dashed')
         self.plotQ.line('x', 'y', source=self.sourceQb, color='black', line_width=2, line_dash='dotted')
                
-        self.plotQ.line('x', 'y', source=self.sourceQ_reduced, color='red', line_width=2)
+        self.plotQ.line('x', 'y', source=self.sourceQ_reduced, color='red', line_width=3)
         self.plotQ.line('x', 'y', source=self.sourceQf_reduced, color='red', line_width=2, line_dash='dashed')#, legend='forward')
         self.plotQ.line('x', 'y', source=self.sourceQb_reduced, color='red', line_width=2, line_dash='dotted')#, legend='backward')
         
