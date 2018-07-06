@@ -72,7 +72,7 @@ class SetupApp:
         
         
         # Set up plotP
-        self.plotP = Figure(plot_height=400, plot_width=600, title="Pressure",
+        self.plotP = Figure(plot_height=300, plot_width=450, title="Pressure",
                             x_axis_label="t [s]", y_axis_label="P [mmHg]",
                             tools="crosshair,pan,reset,resize,save,wheel_zoom"
                             )
@@ -96,7 +96,7 @@ class SetupApp:
         self.sourceQb_reduced = ColumnDataSource(data=dict(x=[], y=[]))
         
         # Set up plotQ
-        self.plotQ = Figure(plot_height=400, plot_width=600, title="flow",
+        self.plotQ = Figure(plot_height=300, plot_width=450, title="flow",
                             x_axis_label="t [s]", y_axis_label="Q [ml/s]",
                             tools="crosshair,pan,reset,resize,save,wheel_zoom",
                             )
@@ -119,7 +119,7 @@ class SetupApp:
         
         self.sourceImg = ColumnDataSource(data=dict(url = [localUrl]))
          
-        self.plot_Img = Figure(plot_width=600, plot_height=800, title=vesselName, 
+        self.plot_Img = Figure(plot_width=450, plot_height=600, title=vesselName, 
                                tools="crosshair, pan, reset, resize, save, wheel_zoom, box_zoom")
         self.plot_Img.x_range = Range1d(start=0, end=1)
         self.plot_Img.y_range = Range1d(start=0, end=1)
