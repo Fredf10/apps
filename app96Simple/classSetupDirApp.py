@@ -129,6 +129,11 @@ class SetupApp:
         vesselList = []
         for Id in range(1, 97):
             vesselList.append(str(Id))
+        constraintValues_array = np.arange(0.1, 3.5, 0.1)
+        constrantValues = []
+        for constrainValue in constraintValues_array:
+            constrantValues.append(str(round(constrainValue, 1)))
+        
         
         self.internalVessels = [1, 2, 3, 4, 5, 7, 9, 14, 15, 18, 19, 21, 23, 27, 28, 29, 30, 35, 37, 39, 41, 42, 43, 44, 46, 50, 52]
         
@@ -166,7 +171,8 @@ class SetupApp:
                                   'r. ant. Cerebral (Pressure epsilon avg)':self.rightAnteriorCerebralPressureDict,
                                   'r. ant. Cerebral (Flow epsilon avg)':self.rightAnteriorCerebralFlowDict}
         
-        self.constraintSlider = Slider(title='Choose constraint', value=0.1, start=0.1, end=3.5, step=0.1)
+        #self.constraintSlider = Slider(title='Choose constraint', value=0.1, start=0.1, end=3.5, step=0.1)
+        self.constraintSlider = Select(title='Choose constraint', value='0.1', options=constrantValues)
         
         
         self.Widgetlist = [self.waveSplitSelect, self.minimizeSelect, self.constraintSlider]
