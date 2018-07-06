@@ -72,17 +72,17 @@ class SetupApp:
         
         
         # Set up plotP
-        self.plotP = Figure(plot_height=250, plot_width=300, title="Pressure",
+        self.plotP = Figure(plot_height=275, plot_width=350, title="Pressure",
                             x_axis_label="t [s]", y_axis_label="P [mmHg]",
                             tools="crosshair,pan,reset,resize,save,wheel_zoom"
                             )
         
-        self.plotP.line('x', 'y', source=self.sourceP, color='black', line_width=2, legend='Full model')
+        self.plotP.line('x', 'y', source=self.sourceP, color='black', line_width=2)#, legend='Full model')
         self.plotP.line('x', 'y', source=self.sourcePf, color='black', line_width=2, line_dash='dashed')
         self.plotP.line('x', 'y', source=self.sourcePb, color='black', line_width=2, line_dash='dotted')
         
         
-        self.plotP.line('x', 'y', source=self.sourceP_reduced, color='red', line_width=2, legend='Reduced model')
+        self.plotP.line('x', 'y', source=self.sourceP_reduced, color='red', line_width=2)#, legend='Reduced model')
         self.plotP.line('x', 'y', source=self.sourcePf_reduced, color='red', line_width=2, line_dash='dashed')
         self.plotP.line('x', 'y', source=self.sourcePb_reduced, color='red', line_width=2, line_dash='dotted')
         
@@ -96,7 +96,7 @@ class SetupApp:
         self.sourceQb_reduced = ColumnDataSource(data=dict(x=[], y=[]))
         
         # Set up plotQ
-        self.plotQ = Figure(plot_height=250, plot_width=300, title="flow",
+        self.plotQ = Figure(plot_height=275, plot_width=350, title="flow",
                             x_axis_label="t [s]", y_axis_label="Q [ml/s]",
                             tools="crosshair,pan,reset,resize,save,wheel_zoom",
                             )
@@ -106,8 +106,8 @@ class SetupApp:
         self.plotQ.line('x', 'y', source=self.sourceQb, color='black', line_width=2, line_dash='dotted')
                
         self.plotQ.line('x', 'y', source=self.sourceQ_reduced, color='red', line_width=2)
-        self.plotQ.line('x', 'y', source=self.sourceQf_reduced, color='red', line_width=2, line_dash='dashed', legend='forward')
-        self.plotQ.line('x', 'y', source=self.sourceQb_reduced, color='red', line_width=2, line_dash='dotted', legend='backward')
+        self.plotQ.line('x', 'y', source=self.sourceQf_reduced, color='red', line_width=2, line_dash='dashed')#, legend='forward')
+        self.plotQ.line('x', 'y', source=self.sourceQb_reduced, color='red', line_width=2, line_dash='dotted')#, legend='backward')
         
         
         # Set up network plot loaded from image
@@ -253,9 +253,9 @@ class SetupApp:
         Nv_baseline = baseVesseldata['Nv']
         Nv_reduced = vesselData['Nv']
         
-        self.plotP.title.text = "Pm = ({0}, {1}), R = ({2}, {3}); format = (Full, Reduced), epsilon = {4}".format(Pm, Pm_reduced, R, R_reduced, RMS_P)
+        #self.plotP.title.text = "Pm = ({0}, {1}), R = ({2}, {3}); format = (Full, Reduced), epsilon = {4}".format(Pm, Pm_reduced, R, R_reduced, RMS_P)
         self.plot_Img.title.text = vesselData['name']
-        self.plotQ.title.text = "Qm = ({0}, {1}), epsilon = {2}. N = ({3}, {4})".format(Qm, Qm_reduced, RMS_Q, Nv_baseline, Nv_reduced)
+        #self.plotQ.title.text = "Qm = ({0}, {1}), epsilon = {2}. N = ({3}, {4})".format(Qm, Qm_reduced, RMS_Q, Nv_baseline, Nv_reduced)
         
         self.sourceP.data = dict(x=time, y=P)
 
