@@ -1,12 +1,8 @@
 # src-ch1/ODEschemes.py
 
 import numpy as np
-from matplotlib.pyplot import plot, show, legend, hold,rcParams,rc, figure, axhline, close,\
-    xticks, title, xlabel, ylabel, savefig, axis, grid, subplots, setp
 
-# change some default values to make plots more readable 
-LNWDT=3; FNT=10
-rcParams['lines.linewidth'] = LNWDT; rcParams['font.size'] = FNT
+
 
 
 # define Euler solver
