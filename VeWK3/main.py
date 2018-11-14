@@ -20,5 +20,6 @@ for w in app.Widgetlist:
 
 # Set up layouts and add to document
 inputs = column(children=app.Widgetlist)
-outputs = column(children=[app.plot_line])
-curdoc().add_root(Row(children=[inputs, outputs], width=1200))
+FigRow1 = column(children=[app.plot_P, app.plot_LV_loop])
+FigRow2 = column(children=[app.plot_P_last, app.plot_flow_or_elastance_last])
+curdoc().add_root(Row(children=[inputs, FigRow1, FigRow2], width=2000))
