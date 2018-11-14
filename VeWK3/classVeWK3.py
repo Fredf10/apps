@@ -5,8 +5,8 @@ Created on Apr 12, 2018
 '''
 
 import numpy as np
-import matplotlib.pylab as plt
-import scipy.optimize
+#import matplotlib.pylab as plt
+#import scipy.optimize
 from ODEschemes import rk4
 
 
@@ -191,36 +191,36 @@ class varyingElastance:
     
         
 
-if __name__ == "__main__":
-    
-    T = 1.
-    N = 1000*5
-    cardiacCycles = 5
-    t = np.linspace(0, T*cardiacCycles, N*cardiacCycles + 1)
-    
-    veWK3 = varyingElastance(t, T)
-    
-    t, P, P_LV, Q, E, V = veWK3.solveNCycle(Ncycles=cardiacCycles)
-    
-    plt.figure()
-    plt.plot(t, P)
-    plt.plot(t, P_LV)
-    
-    plt.figure()
-    plt.plot(t, Q)
-
-    plt.figure()
-    plt.plot(t, V)
-
-    plt.figure()
-    plt.plot(P_LV, V)
-
-    plt.figure()
-    plt.plot(t[:-1], (E[1:]-E[:-1])/(t[1:]-t[:-1]))
-    plt.figure()
-    plt.plot(t, E)
-
-    plt.show()
+# if __name__ == "__main__":
+#     
+#     T = 1.
+#     N = 1000*5
+#     cardiacCycles = 5
+#     t = np.linspace(0, T*cardiacCycles, N*cardiacCycles + 1)
+#     
+#     veWK3 = varyingElastance(t, T)
+#     
+#     t, P, P_LV, Q, E, V = veWK3.solveNCycle(Ncycles=cardiacCycles)
+#     
+#     plt.figure()
+#     plt.plot(t, P)
+#     plt.plot(t, P_LV)
+#     
+#     plt.figure()
+#     plt.plot(t, Q)
+# 
+#     plt.figure()
+#     plt.plot(t, V)
+# 
+#     plt.figure()
+#     plt.plot(P_LV, V)
+# 
+#     plt.figure()
+#     plt.plot(t[:-1], (E[1:]-E[:-1])/(t[1:]-t[:-1]))
+#     plt.figure()
+#     plt.plot(t, E)
+# 
+#     plt.show()
 
 #     fig, ax1 = plt.subplots()
 #     
