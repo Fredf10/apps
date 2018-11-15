@@ -45,21 +45,21 @@ class SetupApp:
         self.source_q_last = ColumnDataSource(data=dict(x=t_last_cycle, y=Q_last))
         self.source_E_last = ColumnDataSource(data=dict(x=[], y=[]))
         # Set up plot_line y = a*x + b
-        self.plot_P = Figure(plot_height=500, plot_width=650, title="aortic and ventricular pressure",
+        self.plot_P = Figure(plot_height=400, plot_width=550, title="aortic and ventricular pressure",
                              x_axis_label="t", y_axis_label="P [mmHg]",
                              tools="crosshair,pan,reset,save,wheel_zoom",
-                             )
-        self.plot_LV_loop = Figure(plot_height=500, plot_width=650, title="PV-loop",
+                             y_range=[0, 200])
+        self.plot_LV_loop = Figure(plot_height=400, plot_width=550, title="PV-loop",
                                    x_axis_label="V [ml]", y_axis_label="P [mmHg]",
                                    tools="crosshair,pan,reset,save,wheel_zoom",
-                                   )
+                                   x_range=[0, 200], y_range=[0, 200])
 
-        self.plot_P_last = Figure(plot_height=500, plot_width=650, title="aortic and ventricular pressure (last cardiac cycle)",
+        self.plot_P_last = Figure(plot_height=400, plot_width=550, title="aortic and ventricular pressure (last cardiac cycle)",
                                   x_axis_label="t", y_axis_label="P [mmHg]",
                                   tools="crosshair,pan,reset,save,wheel_zoom",
-                                  )
+                                  y_range=[0, 200])
 
-        self.plot_flow_or_elastance_last = Figure(plot_height=500, plot_width=650, title="flow",
+        self.plot_flow_or_elastance_last = Figure(plot_height=400, plot_width=550, title="flow",
                                                   x_axis_label="t", y_axis_label="flow [ml/s]",
                                                   tools="crosshair,pan,reset,save,wheel_zoom",
                                                   )
