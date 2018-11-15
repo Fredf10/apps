@@ -26,7 +26,7 @@ class SetupApp:
         
         
         self.T = 1.
-        N = 1000*5
+        N = 250
         self.cardiacCycles = 5
         self.t = np.linspace(0, self.T*self.cardiacCycles, N*self.cardiacCycles + 1)
 
@@ -85,12 +85,19 @@ class SetupApp:
         self.n1Select = Select(title="select elastance shape-function n1", value="1.32", options=["1.1", "1.2", "1.32", "1.4"])
         self.n2Select = Select(title="select elastance shape-function n2", value="21.9", options=["15", "21.9", "25", "30"])
         self.flowOrElastanceSelect = Select(title="show flow or elastance", value="flow", options=["flow", "elastance"])
+        self.nCyclesSelect = Select(title="select number of cycles", value="5", options=["2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"])
+        self.nTimePointsSelect = Select(title="select time-points per cycle", value="250", options=["100", "150", "200", "250", "500", "1000", "2000", "3000", "4000", "5000", "6000", "7000", "8000", "9000", "10000"])
+
+        self.symbolicSelect = Select(title="use symbolic differentiation", value="True", options=["True", "False"])
+        self.isoSelect = Select(title="use integrated iso eq", value="True", options=["True", "False"])
+
         
 
 
         self.Widgetlist = [self.resistanceSelect, self.resistanceFactorSelect, self.complianceSelect,
                            self.eMaxSelect, self.eMinSelect, self.tPeakSelect, self.RvSelect,
-                           self.n1Select, self.n2Select, self.flowOrElastanceSelect]
+                           self.n1Select, self.n2Select, self.flowOrElastanceSelect, self.nCyclesSelect, 
+                           self.nTimePointsSelect, self.symbolicSelect, self.isoSelect]
         
     def update_data(self, attrname, old, new):
     
@@ -107,7 +114,13 @@ class SetupApp:
         n1 = float(self.n1Select.value)
         n2 = float(self.n2Select.value)
         flowOrElastance = self.flowOrElastanceSelect.value
-
+        self.cardiacCycles = int(self.nCyclesSelect.value)
+        symbolic_differentiation = (self.symbolicSelect.value)
+        integrated_iso_eq = (self.isoSelect.value)
+        N = int(self.nTimePointsSelect.value)
+        t = np.linspace(0, self.T*self.cardiacCycles, N*self.cardiacCycles + 1)
+        
+        
         
         self.veWK3.initializeWKParams(R_tot=R_tot, C_tot=C_tot, R1_frac=R_factor)
         self.veWK3.Emax = Emax
@@ -117,6 +130,17 @@ class SetupApp:
         self.veWK3.n1 = n1
         self.veWK3.n2 = n2
         
+        if symbolic_differentiation == "True":
+            self.veWK3.symbolic_differentiation = True
+        else:
+            self.veWK3.symbolic_differentiation = False
+
+        if integrated_iso_eq == "True":
+            self.veWK3.integrated_iso_eq = True
+        else:
+            self.veWK3.integrated_iso_eq = False
+        
+        self.veWK3.t = t
         t, P, P_LV, Q, E, V = self.veWK3.solveNCycle(Ncycles=self.cardiacCycles)
         
         t_last_cycle = np.linspace(self.T*(self.cardiacCycles - 1), self.T*(self.cardiacCycles - 0), 1001)

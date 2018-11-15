@@ -34,6 +34,8 @@ class varyingElastance:
         self.a2Factor = 1.677
         
         self.it = 0
+        self.symbolic_differentiation = True
+        self.integrated_iso_eq = True
         
         self.initializeWKParams()
         
@@ -65,7 +67,11 @@ class varyingElastance:
         Emax = self.Emax
         Emin = self.Emin
         #dEdt = (Emax-Emin)*alpha*((t/a1)**(2*n1)*(t/a2)**n2*n2-(t/a2)**n2*(t/a1)**n1*n1+(t/a1)**n1*(t/a2)**n2*n2-(t/a1)**n1*n1)/((1+(t/a1)**n1)**2*(1+(t/a2)**n2)**2*t)
-        return E
+        if t == 0.0:
+            dEdt = 0
+        else:
+            dEdt = -alpha*n1*(t/a1)**(2*n1)*(Emax - Emin)/(t*((t/a1)**n1 + 1.0)**2*((t/a2)**n2 + 1.0)) + alpha*n1*(t/a1)**n1*(Emax - Emin)/(t*((t/a1)**n1 + 1.0)*((t/a2)**n2 + 1.0)) - alpha*n2*(t/a1)**n1*(t/a2)**n2*(Emax - Emin)/(t*((t/a1)**n1 + 1.0)*((t/a2)**n2 + 1.0)**2)
+        return E, dEdt
     
     def readDatFile(self, fileName, scaleFactor=1):
     
@@ -106,8 +112,9 @@ class varyingElastance:
         V = np.zeros(N)
         E = np.zeros(N)
         P[0] = self.Pao_0
-        P_LV[0] = self.Elastance(t[0])*(self.Vinit - self.V0)
-        E[0] = self.Elastance(t[0])
+        E0 = self.Elastance(t[0])[0]
+        P_LV[0] = E0*(self.Vinit - self.V0)
+        E[0] = E0
         V[0] = self.Vinit
         
         
@@ -116,7 +123,10 @@ class varyingElastance:
             if Q[n]>=0 and P_LV[n] >= P[n]:
                 Vnext, P_ao_next, P_LV_next, Qnext = self.solveNextSystoleV2(t[n], dt, V[n], Q[n], P[n])
             elif self.Pv < P_LV[n] < P[n]:
-                Vnext, P_ao_next, P_LV_next, Qnext = self.solveNextIsoV2(t[n], dt, V[n], P[n], P_LV[n])
+                if self.integrated_iso_eq:
+                    Vnext, P_ao_next, P_LV_next, Qnext = self.solveNextIsoV3(t[n], dt, V[n], P[n], P_LV[n])
+                else:
+                    Vnext, P_ao_next, P_LV_next, Qnext = self.solveNextIsoV2(t[n], dt, V[n], P[n], P_LV[n])
             else:
                 Vnext, P_ao_next, P_LV_next, Qnext = self.solveNextDiastoleV2(t[n], dt, V[n], P[n], P_LV[n])
             
@@ -126,7 +136,7 @@ class varyingElastance:
             Q[n + 1] = Qnext
             P_LV[n + 1] = P_LV_next
             P[n + 1] = P_ao_next
-            E[n + 1] = self.Elastance(t[n + 1])
+            E[n + 1] = self.Elastance(t[n + 1])[0]
         
         return t, P, P_LV, Q, E, V
         
@@ -145,6 +155,14 @@ class varyingElastance:
         P_ao_next = P_ao*np.exp(-dt/(self.R2*self.C))
         
         return V, P_ao_next, P_LV_next, 0
+
+    def solveNextIsoV3(self, t, dt, V, P_ao, P_LV, dtt=1e-6):
+
+        E = self.Elastance(t + dt)[0]
+        P_LV_next = E*(V - self.V0)
+        P_ao_next = P_ao*np.exp(-dt/(self.R2*self.C))
+        
+        return V, P_ao_next, P_LV_next, 0
     
     def solveNextDiastoleV2(self, t, dt, V, P_ao, P_LV, dtt=1e-6):
         
@@ -157,8 +175,10 @@ class varyingElastance:
         
         """The coupled differential equation of windkessel and Varying Elastance during systole"""
         
-        E = self.Elastance(t)
-        dEdt = (self.Elastance(t + dtt) - self.Elastance(t))/dtt
+        E = self.Elastance(t)[0]
+        dEdt = (self.Elastance(t + dtt)[0] - self.Elastance(t)[0])/dtt
+        if self.symbolic_differentiation:
+            dEdt = self.Elastance(t)[1]
         A = self.C*((dEdt)*(u[0]-self.V0)- E*u[1])
         B = (u[2]/self.R2 -u[1]*(1+ self.R1/self.R2))
         D = dEdt*(u[0]-self.V0)-E*u[1]
@@ -171,8 +191,10 @@ class varyingElastance:
         """The coupled differential equations during diastole, Varying Elastance and Volume flow from left Atrium"""
             
         
-        E = self.Elastance(t)
-        dEdt = (self.Elastance(t + dtt) - self.Elastance(t))/dtt
+        E = self.Elastance(t)[0]
+        dEdt = (self.Elastance(t + dtt)[0] - self.Elastance(t)[0])/dtt
+        if self.symbolic_differentiation:
+            dEdt = self.Elastance(t)[1]
         A = -(u[1]-self.Pv)/self.Rv
         B = dEdt*(u[0] - self.V0)+E*A
         
@@ -183,8 +205,10 @@ class varyingElastance:
         """The Varying Elastance during isoVolumetric Contraction and Relaxation
            in differential form"""
         
-        E = self.Elastance(t)
-        dEdt = (self.Elastance(t + dtt) - self.Elastance(t))/dtt
+        #E = self.Elastance(t)[0]
+        dEdt = (self.Elastance(t + dtt)[0] - self.Elastance(t)[0])/dtt
+        if self.symbolic_differentiation:
+            dEdt = self.Elastance(t)[1]
         
         
         return [0, dEdt*(u[0] - self.V0)]
