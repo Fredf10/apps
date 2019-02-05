@@ -93,6 +93,21 @@ class SetupApp:
         self.Widgetlist = [self.stepSlider]
         
         self.createLists()
+
+        listOfPlots = [self.plot_sol, self.plot_phi]
+        
+        self.ajustFontSize(listOfPlots, '20pt', '15pt')
+        
+    
+    def ajustFontSize(self, listOfObjects, font_size, axis_size):
+    
+        
+        for ob in listOfObjects:
+            ob.xaxis.major_label_text_font_size = axis_size
+            ob.yaxis.major_label_text_font_size = axis_size
+            
+            ob.xaxis.axis_label_text_font_size = font_size
+            ob.yaxis.axis_label_text_font_size = font_size
         
         
     def update_data(self, attrname, old, new):
@@ -149,6 +164,8 @@ class SetupApp:
 
         elif step == 17:
             self.source_sol_euler.data = dict(x=self.X, y=self.y_list[4])
+
+
             
     
     def createLists(self):
