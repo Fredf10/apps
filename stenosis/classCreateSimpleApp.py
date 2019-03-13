@@ -26,6 +26,7 @@ class SetupApp:
         # conversion factors
         #===================================================
         m_to_mm = 1e3
+        mm_to_m = 1e-3
         Pa_to_mmHg = 1./133.32
         #===================================================
         # load dictionaries with data format:
@@ -69,6 +70,10 @@ class SetupApp:
         ur = self.solutionDict[xPos_init]['ur']
         p = self.solutionDict[xPos_init]['P']*Pa_to_mmHg
         
+        U0 = max(uz)/2.
+        R0 = max(r)*mm_to_m
+        self.Q = U0*np.pi*R0**2
+        
         indx = np.where(self.samplepointsLongitudinal == xPos_init)
         xPos = X[indx]
         rPos = R[indx]
@@ -79,6 +84,7 @@ class SetupApp:
         self.source_space_visc = ColumnDataSource(data=dict(x=[], P_visc=[], P_visc_pouseille=[],))
         self.source_space_oneD = ColumnDataSource(data=dict(x=[], P_1D=[], P_1D_conventional=[],))
         self.source = ColumnDataSource(data=dict(x=r, y=uz, P=p,))
+        self.source_pouseille = ColumnDataSource(data=dict(x=[], y=[],))
         self.source_pos = ColumnDataSource(data=dict(x=xPos, r=rPos, P=pPos,))
         # Set up plot_line y = a*x + b
         self.plot_radius = Figure(plot_height=450, plot_width=600, title="radius",
@@ -106,9 +112,10 @@ class SetupApp:
         self.plot_velocity_pos = Figure(plot_height=450, plot_width=600, title="velocity profile at given position",
                                         x_axis_label="Uz [m/s]", y_axis_label="r [mm]",
                                         tools="crosshair,pan,reset,resize,save,wheel_zoom",
-                                        x_range=[-0.2, 3.0], y_range=[0, 1.6])
+                                        x_range=[-0.2, 5.0], y_range=[0, 1.6])
         
         self.plot_velocity_pos.line('y', 'x', source=self.source, color='black', line_alpha=1, line_width=2)
+        self.plot_velocity_pos.line('y', 'x', source=self.source_pouseille, color='chartreuse', line_alpha=1, line_width=2)
 
         self.plot_pressure_pos = Figure(plot_height=450, plot_width=600, title="pressure profile at given position",
                                         x_axis_label="P [mmHg]", y_axis_label="r [mm]" ,
@@ -232,8 +239,21 @@ class SetupApp:
             self.source_space_conv.data = dict(x=[], P_convective=[], P_convective_flat=[])
         if oneD == "True":
             self.source_space_oneD.data = dict(x=X, P_1D=P_oneD, P_1D_conventional=P_oneD_conventional)
+            
+            if velocityComponent == "Uz":
+                
+                r0 = max(r)/1000.
+                U0 = self.Q/(np.pi*r0**2)
+                U_pouseille = self.velocity(U0, r0*1000, r, 2)
+                
+                self.source_pouseille.data = dict(x=r, y=U_pouseille)
+            else:
+                self.source_pouseille.data = dict(x=[], y=[])
+            
+            
         else:
             self.source_space_oneD.data = dict(x=[], P_1D=[], P_1D_conventional=[])
+            self.source_pouseille.data = dict(x=[], y=[])
         
         
         
@@ -268,3 +288,9 @@ class SetupApp:
         solutionDict_space_geom = pickle.load(open(solutionDict_space_path_geom, "rb"))
         
         return solutionDict, solutionDict_space, solutionDict_mu, solutionDict_space_mu, solutionDict_geom, solutionDict_space_geom, solutionDict_geom_mu, solutionDict_space_geom_mu
+    
+    def velocity(self, U, R, r, zetha):
+        zetha=float(zetha)
+        
+        u=U*((zetha+2)/zetha)*(1-(r/R)**zetha)
+        return u
